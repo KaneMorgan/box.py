@@ -289,7 +289,7 @@ class BoxClient(object):
 
     def _request(self, method, resource, params=None, data=None, headers=None, endpoint="api", try_refresh=True, **kwargs):
         """
-        Performs a HTTP request to Box.
+        Performs a HTTP request to Box. *bookmark -http request*
 
         This method adds authentication headers, and performs error checking on the response.
         It also automatically tries to refresh tokens, if possible.
@@ -1078,7 +1078,23 @@ class BoxClient(object):
             'role': role,
         }
         return self._request('put', 'collaborations/{0}'.format(collaboration_id), headers=headers, data=data).json()
-
+        
+######################################################### New function ###############################################    
+    def change_owner_by_login(self, collaboration_id):
+        """
+        transfers the ownership of a folder you currently own to a new owner.
+        
+        Args:
+            - collaboration_id: collaboration id to be edited
+            - new_owner_login: The email log in of the person who the ownership is being transferred to
+        """
+        
+        try:
+            self.edit_collaboration(collaboration_id, role = 'owner')
+        except ValueError:
+            pass
+    
+######################################################################################################################    
     def delete_collaboration(self, collaboration_id, etag=None):
         """
         Deletes a collaboration.
