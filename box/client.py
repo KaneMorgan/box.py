@@ -1079,7 +1079,7 @@ class BoxClient(object):
         }
         return self._request('put', 'collaborations/{0}'.format(collaboration_id), headers=headers, data=data).json()
         
-######################################################### New function ###############################################    
+
     def change_owner_by_login(self, collaboration_id):
         """
         transfers the ownership of a folder you currently own to a new owner.
@@ -1094,7 +1094,7 @@ class BoxClient(object):
         except ValueError:
             pass
     
-######################################################################################################################    
+
     def delete_collaboration(self, collaboration_id, etag=None):
         """
         Deletes a collaboration.
@@ -1110,8 +1110,94 @@ class BoxClient(object):
             headers['If-Match'] = etag
 
         self._request("delete", 'collaborations/{0}'.format(collaboration_id), headers=headers)
+    ##################################### new function ############################################
+    def get_groups(self):
+        """ returns json representing the groups on the Box account
+        """
+        return self._request("GET", "groups")
+    
+    def create_group(self,groupname = None):
+        """ Creates a new group
+        
+        Args:
+            - groupname: name of the group to be created
+        """
+        
+        return self._request("POST","groups",data = '{"name":"%s"}'%groupname)
+        
+    def update_groupname(self, group_id, new_name):
+        """ changes the name of a group.
+        Args:
+            - group_id : the id number of the group
+            - new_name : the new name of the group
+        """
+        return self._request("PUT","groups/%s"%group_id, data ='{"name":"%s"}'%new_name )
 
-
+    
+    def delete_group(self,group_id):
+        """ deletes a group.
+        Args:
+            -group_id : the id number of the group
+        """
+        return self._request("DELETE","groups/%s"%group_id)
+    
+    def get_group_memberships(self,group_id, limit = 100, offset = 0):
+        """ gets the members of a group.
+        Args:
+            -group_id : the id number of the group
+            -limit : number of results to return
+            - offset : where to start returning members from eg offset = 10 
+            will return memberships from 10 -110
+        """
+        params = {
+            'limit': limit,
+            'offset': offset,
+        }
+        
+        return self._request("GET","groups/{0}/memberships".format(group_id),params)
+    
+    def get_users_group_memberships(self, user_id):
+        """ gets the group memberships of a user
+        Args:
+            - user_id: the id number of the user
+        """
+        return self._request("GET","users/{0}/memberships".format(user_id))
+    
+    def get_group_membership_object(self,group_membership_id):
+        """ gets a group membership object given a group id
+        Args:
+            - group_membership_id : the id number of the object
+        """
+        return self._request("GET","group_memberships/{0}".format(group_membership_id))
+    
+    def add_member_to_group(self,user_id,group_id):
+        """ 
+        adds a member to a group
+        Args:
+            -user_id: users ID number
+            -group_id: groups ID number
+        
+        """
+        data = '{ "user":{"id":%s},"group":{"id":%s}}'%(user_id,group_id)
+        return self._request("POST","group_memberships",data=data)
+    
+    def delete_group_membership(self,membership_id):
+        """
+        deletes a group membership
+        Args:
+            -membership_id
+        """
+        return self._request("DELETE","group_memberships/{0}".format(membership_id))
+        
+    def get_group_collaborations(self,group_id):
+        """
+        gets all the collaborations of a group
+        Args:
+            -group_id : groups id number
+        """
+        return self._request("GET","groups/{0}/collaborations".format(group_id))
+        
+        
 class BoxClientException(Exception):
     def __init__(self, status_code, message=None, **kwargs):
         super(BoxClientException, self).__init__(message)
